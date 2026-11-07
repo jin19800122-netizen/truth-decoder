@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>政治除魅實驗室：真相解碼器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans TC', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+    .card-glow-green { box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3); }
+    .card-glow-blue { box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.3); }
+    .neon-border-green { border-color: #10b981; }
+    .neon-border-blue { border-color: #38bdf8; }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+  <div id="app" class="max-w-4xl mx-auto px-4 pt-6">
+
+    <!-- Header 頂部導航 -->
+    <header class="text-center mb-8">
+      <div class="inline-block bg-zinc-800 text-xs px-3 py-1 rounded-full text-zinc-400 mb-3 border border-zinc-700">
+        ⚡ 撕開政治濾鏡 ｜ 事實與爭議交互檢驗
+      </div>
+      <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white mb-3">
+        政治除魅實驗室<span class="text-emerald-400">.</span>
+      </h1>
+      <p class="text-sm md:text-base text-zinc-400 max-w-xl mx-auto">
+        沈伯洋被酸什麼？蔣萬安被打哪裡？點擊切換視角，檢視炎上砲火與官方脈絡。
+      </p>
+
+      <!-- 人物切換 Tab -->
+      <div class="flex justify-center gap-3 mt-6">
+        <button 
+          @click="activeTab = 'shen'"
+          :class="activeTab === 'shen' ? 'bg-emerald-500 text-black font-bold shadow-lg shadow-emerald-500/30' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'"
+          class="px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2">
+          <span>🛡️ 沈伯洋專區</span>
+          <span class="text-xs opacity-75">（國防/言論/立委）</span>
+        </button>
+        <button 
+          @click="activeTab = 'chiang'"
+          :class="activeTab === 'chiang' ? 'bg-sky-500 text-black font-bold shadow-lg shadow-sky-500/30' : 'bg-zinc-800 text-zinc-300 border border-zinc-700'"
+          class="px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2">
+          <span>🏛️ 蔣萬安專區</span>
+          <span class="text-xs opacity-75">（市政/魄力/辯論）</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 議題卡片清單 -->
+    <main class="space-y-6">
+      <div 
+        v-for="(item, idx) in currentList" 
+        :key="idx"
+        class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 md:p-6 transition-all"
+        :class="activeTab === 'shen' ? 'hover:border-emerald-500/50 card-glow-green' : 'hover:border-sky-500/50 card-glow-blue'">
+        
+        <!-- 標籤與切換按鈕列 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
+              {{ item.tag }}
+            </span>
+            <h2 class="text-base md:text-lg font-bold text-white">{{ item.title }}</h2>
+          </div>
+
+          <!-- 解密切換開關 -->
+          <button 
+            @click="item.decoded = !item.decoded"
+            class="text-xs md:text-sm font-bold px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5"
+            :class="item.decoded 
+              ? (activeTab === 'shen' ? 'bg-emerald-500 text-black' : 'bg-sky-500 text-black') 
+              : 'bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500/30'">
+            <span>{{ item.decoded ? '💡 檢視砲火模式' : '🔥 點擊解碼真相' }}</span>
+          </button>
+        </div>
+
+        <!-- 視角一：砲火質疑模式 (未解碼) -->
+        <div v-if="!item.decoded" class="bg-rose-950/20 border border-rose-900/40 rounded-xl p-4">
+          <div class="flex items-center gap-2 text-rose-400 text-xs font-bold mb-2">
+            <span>⚠️ 網路炎上熱點 / 反對陣營質疑</span>
+          </div>
+          <p class="text-zinc-200 text-sm md:text-base leading-relaxed mb-3">
+            {{ item.attack }}
+          </p>
+          <div class="text-xs text-rose-400/80 bg-rose-950/40 px-3 py-2 rounded-lg">
+            💬 <strong>社群熱門酸語：</strong>「{{ item.buzzword }}」
+          </div>
+        </div>
+
+        <!-- 視角二：解碼還原模式 (已解碼) -->
+        <div v-else class="space-y-4">
+          <!-- 事實與本人說法 -->
+          <div class="bg-zinc-800/60 border rounded-xl p-4" :class="activeTab === 'shen' ? 'neon-border-green' : 'neon-border-blue'">
+            <div class="flex items-center gap-2 text-xs font-bold mb-2" :class="activeTab === 'shen' ? 'text-emerald-400' : 'text-sky-400'">
+              <span>✅ 完整脈絡、官方回應與法規事實</span>
+            </div>
+            <p class="text-zinc-200 text-sm md:text-base leading-relaxed whitespace-pre-line">
+              {{ item.fact }}
+            </p>
+          </div>
+
+          <!-- 客觀檢驗與盲點 -->
+          <div class="bg-zinc-800/30 border border-zinc-700/50 rounded-xl p-3.5 text-xs text-zinc-400">
+            <span class="text-amber-400 font-bold">⚖️ 盲點檢驗：</span>
+            {{ item.blindspot }}
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- 底部資訊 -->
+    <footer class="mt-12 text-center text-xs text-zinc-500">
+      政治除魅實驗室 ｜ 內容整理自公開政見、專訪與立院質詢紀錄 ｜ 拒絕盲從，理性對話
+    </footer>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+      setup() {
+        const activeTab = ref('shen');
+
+        const shenData = ref([
+          {
+            tag: '民防與言論',
+            title: '認知作戰框架是否淪為「思想審查」？',
+            decoded: false,
+            attack: '反對者質疑：只要批評政府政策、懷疑美方政策，動輒被打成「中共同路人」或「在地協力者」。打著全民防衛的旗號，實質上在壓縮民主言論空間與政黨監督權利。',
+            buzzword: '批評政府就變中共同路人？',
+            fact: '沈伯洋與黑熊學院多次公開澄清：認知作戰研究主要鎖定的是「境外敵對勢力由上而下的金流鏈條、假訊息操盤節點與組織化網軍」，而非懲罰國民批評政府的言論自由。\n\n其法案倡議核心在於規範高風險涉外接觸人員申報與防範隱蔽影響力，並非審查平民的日常政治立場。',
+            blindspot: '身兼執政黨不分區立委後，專家角色難免受政黨攻防牽制。若相關界線由行政部門彈性認定，對在野黨與公眾而言確實存在擴權疑慮。'
+          },
+          {
+            tag: '臨場專業',
+            title: '造勢回答讀書方法被批「補教名師講空話」',
+            decoded: false,
+            attack: '在造勢場合被學生提問如何讀書，限時一分鐘卻只回答「要找對方法、每個人不一樣」，被批身為法學名師卻在公眾場合言不及義、毫無乾貨。',
+            buzzword: '聽君一席話，如聽一席話。',
+            fact: '造勢活動本質上節奏緊湊，且主持人明確保證時間只有 60 秒。\n\n他在深度專訪（如《鏡文學》）曾分享過完整的「三階段筆記術」：跨版本參考書比對架構、厚書讀成50頁精華手寫筆記精讀20遍，以及受李茂生啟發的「批判原作者、找盲點」辯證思維。',
+            blindspot: '60秒雖短，但若有經驗的名師直接提煉出「跨版本比對、濃縮薄筆記、挑破綻」三絕招，約40秒就能清楚交代。選擇講安全雞湯，難免讓期待名師乾貨的青年感到落差。'
+          },
+          {
+            tag: '政黨身分',
+            title: '民間學者入閣是否加劇社會分裂？',
+            decoded: false,
+            attack: '民防本應超越藍綠、團結全民，但他進入民進黨不分區名單後頻頻站在政治衝突第一線，讓國防民防議題被貼上政黨標籤，反而讓非綠支持者產生抗拒。',
+            buzzword: '抗中保台淪為選舉提款機？',
+            fact: '沈伯洋表示進入立法院是為了在體制內推動國安法規與民防制度化，若無政黨席次支持，體制外的公民倡議難以落實為實質法案。',
+            blindspot: '當推動民防的人帶有高度鮮明的黨派色彩與對抗性格時，確實容易在社會溝通上造成反效果，讓中間或在野民眾產生心理防線。'
+          }
+        ]);
+
+        const chiangData = ref([
+          {
+            tag: '市政魄力',
+            title: '大案避重就輕，被指「公關型市長」？',
+            decoded: false,
+            attack: '綠營與批評者指出：面對台智光弊案、幼兒園案、大巨蛋漏水等風波反應慢半拍，公開發言常依賴發言人擬稿，遇到爭議只會回答「依法辦理」，缺乏首都市長的決斷力。',
+            buzzword: '跳針念稿機器、公關型立牌？',
+            fact: '台北市府指出：大巨蛋在歷經多年卡關後，蔣市府上任1年內完成公安複驗並取得使用執照順利營運；針對漏水連續重罰遠雄並要求限期改善。\n\n台智光案亦由市府主動解除前朝簽訂之警察局專線子約，回歸法治程序並配合檢調調查。',
+            blindspot: '在危機處理的第一時間，若過度著重法務程序防禦與公關修辭，容易給公眾「魄力不足、被動應對」的政治觀感。'
+          },
+          {
+            tag: '辯論與口才',
+            title: '市長辯論「大型社死」與說話邏輯爭議',
+            decoded: false,
+            attack: '反對者批評其在現場辯論或即席質詢中，習慣把簡單問題複雜化、避談具體解法，一旦失去幕僚團隊的預擬腳本就容易原形畢露。',
+            buzzword: '辯論社死現場、講話沒重點？',
+            fact: '支持者與幕僚指出：蔣萬安具備美國矽谷執業律師背景，論述強調法律程序正義與行政分權嚴謹性。在公開辯論中，其政見論述涵蓋矽谷經驗帶入台北創業生態、育兒生津貼翻倍等實質政策。',
+            blindspot: '面對民意對即時直球對決的期待，過於嚴謹甚至保守的官僚法律語言，在短影音與即時傳播時代容易被解讀為言不及義。'
+          },
+          {
+            tag: '重大建設',
+            title: '「大都更時代」是否淪為口號包裝？',
+            decoded: false,
+            attack: '喊出台北進入大都更時代，但市區老屋數量龐大，公辦都更審查速度依然趕不上老化速度，被質疑政策宣傳大於實質落地。',
+            buzzword: '都更喊得響，老屋拆不動？',
+            fact: '蔣市府上任後推出「都更5+2箭」，包括降門檻（公辦都更意願門檻自90%降至75%）、提高防災型都更容積獎勵（最高達原容積1.3倍），整建維護申請件數較前朝成長顯著。',
+            blindspot: '都更涉及私人產權與釘子戶整合，即便法規放寬，民間建商與所有權人協商仍受限於市場機制，難以短期內全面見效。'
+          }
+        ]);
+
+        const currentList = computed(() => {
+          return activeTab.value === 'shen' ? shenData.value : chiangData.value;
+        });
+
+        return {
+          activeTab,
+          currentList
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
